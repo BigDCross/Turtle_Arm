@@ -1,0 +1,2 @@
+Angle to Pos: f(x) = (x - 30) / 0.29
+Pos to Angle: f(x) = (x * 0.29) + 30
