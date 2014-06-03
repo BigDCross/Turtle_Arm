@@ -1,2 +1,12 @@
 Angle to Pos: f(x) = (x - 30) / 0.29
 Pos to Angle: f(x) = (x * 0.29) + 30
+
+Arm Constraints:
+
+Ground Plane unless mounted (use FK)
+
+Servo1: {0, 1023}
+Servo2: {970, 90}
+Servo3: {35, 1000}
+Servo4: {170, 855}
+Servo5: {225, 522}
