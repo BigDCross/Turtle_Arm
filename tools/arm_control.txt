@@ -6,7 +6,7 @@ Arm Constraints:
 Ground Plane unless mounted (use FK)
 
 Servo1: {0, 1023}
-Servo2: {970, 90}
+Servo2: {90, 970}
 Servo3: {35, 1000}
 Servo4: {170, 855}
 Servo5: {225, 522}
