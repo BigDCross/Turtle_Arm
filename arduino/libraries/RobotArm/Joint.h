@@ -6,14 +6,14 @@
 class Joint
 {
 private:
-    float length;
-    int pos;
-    int angle;
-
     void posToAngle ();
     void angleToPos ();
 
 public:
+    float length;
+    int pos;
+    int angle;
+
     Joint ();
     Joint (float length_);
     Joint (float length_, int pos_);

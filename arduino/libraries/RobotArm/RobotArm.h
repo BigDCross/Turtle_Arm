@@ -1,18 +1,18 @@
 #ifndef ROBOTARM
 #define ROBOTARM
 
-#include <Arduino.h>
-
 #include "Joint.h"
 #include "Vector.h"
 
 #define NUMJOINTS 3
+#define TORADIANS (3.141592 / 180)
+#define TODEGREES (180 / 3.141592)
 
 class RobotArm
 {
 private:
-    Joint joints[NUMJOINTS];
-    int jointPositions[NUMJOINTS];
+    Joint joints[NUMJOINTS - 1];
+    int jointPositions[NUMJOINTS - 1];
     fVector3 currentTarget;
 
     // Used in calculations
@@ -21,17 +21,19 @@ private:
     fVector3 jointOffset;
 
     float calcDistance (int x, int y, int z);
-    void calcOffset (float length, float cumAngle);
+    inline void calcOffset (float length, float cumAngle);
+    void calcGradient ();
 
 public:
-    fVector3 currentPos;
+    fVector3 currentArmPos;
+    fVector5 currentJointPos;
 
     RobotArm ();
     void addJoint (int jointNum, Joint newJoint);
     void setTarget (fVector3 target);
     void calcFK ();
     void calcIK ();
-    void calcGradient ();
+    void printJointPos ();
 } ;
 
 #endif

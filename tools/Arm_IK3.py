@@ -2,9 +2,7 @@ from Arm_FK import *
 from math import sqrt
 import sys
 
-target = dict (X = int (sys.argv[1]), Y = int (sys.argv[2]))
-
-def calc_distance (A, B, C):
+def calc_distance (A, B, C, target):
     # Calculate distance from current position to target
     j1 = Joint (10.5, A)
     j2 = Joint (10.5, B)
@@ -18,15 +16,15 @@ def calc_distance (A, B, C):
 
     return sqrt ((dist["X"] - target["X"]) ** 2 + (dist["Y"] - target["Y"]) ** 2)
 
-def calc_gradient (A, B, C):
+def calc_gradient (A, B, C, target):
     # Inital Pos
-    dist = calc_distance (A, B, C)
+    dist = calc_distance (A, B, C, target)
 
     while dist > 0.1:
         # Calculate slope of gradient for each joint pos
-        gradient_a = calc_distance (A + 1, B, C) - calc_distance (A - 1, B, C)
-        gradient_b = calc_distance (A, B + 1, C) - calc_distance (A, B - 1, C)
-        gradient_c = calc_distance (A, B, C + 1) - calc_distance (A, B, C - 1)
+        gradient_a = calc_distance (A + 1, B, C, target) - calc_distance (A - 1, B, C, target)
+        gradient_b = calc_distance (A, B + 1, C, target) - calc_distance (A, B - 1, C, target)
+        gradient_c = calc_distance (A, B, C + 1, target) - calc_distance (A, B, C - 1, target)
 
         # Go down slope
         A -= gradient_a
@@ -36,16 +34,6 @@ def calc_gradient (A, B, C):
         #print str (gradient_a) + " , " + str (gradient_b) + " , " + str (gradient_c)
 
         # Update distance from target
-        dist = calc_distance (A, B, C)
+        dist = calc_distance (A, B, C, target)
 
     return A, B, C
-
-def main ():
-    A, B, C = calc_gradient (512, 512, 512)
-
-    print "Target"
-    print "X:" + str (target["X"]) + " Y:" + str (target["Y"])
-    print "Servo Positions"
-    print A, B, C
-
-main ()

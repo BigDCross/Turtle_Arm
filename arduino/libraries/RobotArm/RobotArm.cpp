@@ -4,7 +4,15 @@
 #include "Joint.h"
 #include "Vector.h"
 
-// Do most methods in this class even need to return anything?
+// Do most methods in this class even need to return anything? Answer: No
+
+// Arm Control Procedure:
+// Define default position of arm. (And probably move there.)
+// Perform FK for default pos.
+// Pass in desired position. (check constraints, blah blah blah)
+// Find distance from desired position.
+// Perform gradient search. Recalculate FK each iteration. (Keep iterations low) [Maybe set accuracy modes?]
+// Finish moving (and reset target?)
 
 RobotArm::RobotArm ()
 {
@@ -15,9 +23,9 @@ RobotArm::RobotArm ()
     currentTarget.y = 0.0;
     currentTarget.z = 0.0;
 
-    currentPos.x = 0.0;
-    currentPos.y = 0.0;
-    currentPos.z = 0.0;
+    currentArmPos.x = 0.0;
+    currentArmPos.y = 0.0;
+    currentArmPos.z = 0.0;
 
     finalPos.x = 0.0;
     finalPos.y = 0.0;
@@ -35,7 +43,7 @@ void RobotArm::addJoint (int jointNum, Joint newJoint)
 
 void RobotArm::calcFK ()
 {
-    float cumAngle = 0;
+    float cumAngle = 0.0;
 
     for (int i=0; i<NUMJOINTS; i++)
     {
@@ -43,26 +51,54 @@ void RobotArm::calcFK ()
 
         calcOffset (joints[i].getLength(), cumAngle);
 
-        currentPos.x += jointOffset.x;
-        currentPos.y += jointOffset.y;
-        currentPos.z += jointOffset.z;
+        currentArmPos.x += jointOffset.x;
+        currentArmPos.y += jointOffset.y;
+        currentArmPos.z += jointOffset.z;
+
+        Serial.print (jointOffset.x);
+        Serial.print (jointOffset.y);
+        Serial.print (jointOffset.z);
+        Serial.println ();
     }
 }
 
 void RobotArm::calcIK ()
 {
-
+    calcGradient ();
 }
 
 void RobotArm::calcGradient ()
 {
-    float dist = calcDistance (currentPos.x, currentPos.y, currentPos.z);
+    // XXX: REDO! Works with servo positions not currentArmPos
+    float dist = calcDistance (currentArmPos.x, currentArmPos.y, currentArmPos.z);
 
     while (dist > 0.1)
     {
-        gradients.x = calcDistance (currentPos.x + 1, currentPos.y, currentPos.z) - calcDistance (currentPos.x - 1, currentPos.y, currentPos.z);
-        gradients.y = calcDistance (currentPos.x, currentPos.y + 1, currentPos.z) - calcDistance (currentPos.x, currentPos.y - 1, currentPos.z);
-        gradients.z = calcDistance (currentPos.x, currentPos.y, currentPos.z + 1) - calcDistance (currentPos.x, currentPos.y, currentPos.z - 1);
+        gradients.x = calcDistance (joints[0].pos + 1, joints[1].pos, joints[2].pos) - (joints[0].pos - 1, joints[1].pos, joints[2].pos);
+        gradients.y = calcDistance (joints[0].pos, joints[1].pos + 1, joints[2].pos) - (joints[0].pos, joints[1].pos - 1, joints[2].pos);
+        gradients.z = calcDistance (joints[0].pos, joints[1].pos, joints[2].pos + 1) - (joints[0].pos, joints[1].pos, joints[2].pos - 1);
+
+        joints[0].pos -= gradients.x;
+        joints[1].pos -= gradients.y;
+        joints[2].pos -= gradients.z;
+
+        //Serial.print ((int)joints[0].pos);
+        //Serial.print (" ");
+        //Serial.print ((int)joints[1].pos);
+        //Serial.print (" ");
+        //Serial.println ((int)joints[2].pos);
+        
+        //Serial.print (currentArmPos.x);
+        //Serial.print (" ");
+        //Serial.print (currentArmPos.y);
+        //Serial.print (" ");
+        //Serial.println (currentArmPos.z);
+        
+        calcFK ();
+
+        dist = calcDistance (currentArmPos.x, currentArmPos.y, currentArmPos.z);
+
+        //Serial.println (dist);
     }
 }
 
@@ -82,10 +118,22 @@ float RobotArm::calcDistance (int x, int y, int z)
     return (sqrt (distance));
 }
 
-void RobotArm::calcOffset (float length, float cumAngle)
+inline void RobotArm::calcOffset (float length, float cumAngle)
 {
-    // Might take radians
-    jointOffset.x = length * sin (cumAngle);
-    jointOffset.y = length * cos (cumAngle);
-    jointOffset.z = 0;
+    jointOffset.x = length * sin (cumAngle * TORADIANS);
+    jointOffset.y = length * cos (cumAngle * TORADIANS);
+    jointOffset.z = 0.0;
+}
+
+void RobotArm::printJointPos ()
+{
+    Serial.println ("Joint Positions:");
+
+    for (int i=0; i<NUMJOINTS; i++)
+    {
+        Serial.print (joints[i].getPos ());
+        Serial.print (" ");
+    }
+
+    Serial.println ();
 }

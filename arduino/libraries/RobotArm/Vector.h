@@ -72,6 +72,15 @@ typedef struct fVector3
     float z;
 } fVector3 ;
 
+typedef struct fVector5
+{
+    float f0;
+    float f1;
+    float f2;
+    float f3;
+    float f4;
+} fVector5 ;
+
 typedef struct iVector2
 {
     int x;

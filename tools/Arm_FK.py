@@ -30,17 +30,3 @@ def fk (Joints):
         final_pos["Y"] += offset["Y"]
 
     return final_pos
-
-def main ():
-    j1 = Joint (10.5, 424)
-    j2 = Joint (10.5, 695)
-    j3 = Joint (10.5, 720)
-
-    joints = []
-    joints.append (j1)
-    joints.append (j2)
-    joints.append (j3)
-
-    final_pos = fk (joints)
-
-    print final_pos
